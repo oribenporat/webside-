@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aura — דמו: התפריט שמזמין בעצמו</title>
+<meta name="description" content="דמו אינטראקטיבי של Aura - תפריט טאבלט שמאפשר לסועדים להזמין ישירות מהשולחן, בלי לחכות למלצר.">
+
+<!-- TODO: להחליף ל-URL האמיתי של העמוד אחרי הפריסה -->
+<meta property="og:title" content="Aura — התפריט שמזמין בעצמו, בלי לחכות למלצר">
+<meta property="og:description" content="דמו אינטראקטיבי: ככה נראית הזמנה מטאבלט על השולחן, בלי לחכות למלצר.">
+<meta property="og:url" content="https://example.com/">
+<meta property="og:type" content="website">
+<!-- TODO: להוסיף תמונת og:image אמיתית (1200x630) ולהחליף את הכתובת -->
+<meta property="og:image" content="https://example.com/og-image.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg: #0d0c0a;
+    --bg-elev: #17150f;
+    --bg-elev-2: #1e1b13;
+    --text: #f3ede1;
+    --text-muted: rgba(243,237,225,0.7);
+    --text-faint: rgba(243,237,225,0.45);
+    --accent: #c9a24a;
+    --accent-strong: #e0bc6c;
+    --accent-ink: #1b1608;
+    --line: rgba(243,237,225,0.14);
+    --line-accent: rgba(201,162,74,0.4);
+    --radius: 14px;
+    --font-display: 'Rubik', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Rubik', monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; }
+  }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-display);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* שכבת גריין עדינה על כל העמוד */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity:0.035;
+    mix-blend-mode:overlay;
+    pointer-events:none;
+    z-index:999;
+  }
+
+  a{ color:inherit; }
+  img{ max-width:100%; display:block; }
+
+  :focus-visible{
+    outline:3px solid var(--accent);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  .wrap{
+    max-width:1080px;
+    margin:0 auto;
+    padding-inline:24px;
+  }
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:0.7rem;
+    letter-spacing:.2em;
+    color:var(--accent);
+    text-transform:uppercase;
+    display:inline-flex;
+    align-items:center;
+    gap:.6em;
+  }
+  .eyebrow::before{
+    content:"";
+    display:inline-block;
+    width:1.4em;
+    height:1px;
+    background:var(--accent);
+  }
+
+  /* ---------- Header ---------- */
+  header.site{
+    padding-block:20px;
+    border-bottom:1px solid var(--line);
+  }
+  header.site .wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .logo{
+    font-weight:800;
+    font-size:1.15rem;
+    letter-spacing:-.01em;
+  }
+  .logo span{ color:var(--accent); }
+  .header-cta{
+    font-family:var(--font-mono);
+    font-size:.75rem;
+    letter-spacing:.05em;
+    color:var(--text-muted);
+    text-decoration:none;
+    border:1px solid var(--line);
+    padding:.5em 1em;
+    border-radius:999px;
+    transition:border-color .2s ease, color .2s ease;
+  }
+  .header-cta:hover{ border-color:var(--accent); color:var(--accent-strong); }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding-block: clamp(64px, 12vw, 120px) clamp(48px, 8vw, 80px);
+  }
+  .hero h1{
+    margin:.5em 0 0;
+    font-size: clamp(2.4rem, 5.4vw + 1rem, 5.2rem);
+    font-weight:800;
+    line-height:0.98;
+    letter-spacing:-.02em;
+  }
+  .hero h1 em{
+    font-style:normal;
+    color:var(--accent-strong);
+  }
+  .hero p.lede{
+    margin:1.6em 0 0;
+    max-width:46ch;
+    font-size:clamp(1rem, .4vw + .95rem, 1.2rem);
+    color:var(--text-muted);
+  }
+  .hero .actions{
+    margin-top:2.2em;
+    display:flex;
+    gap:1em;
+    flex-wrap:wrap;
+  }
+
+  .btn{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:.95rem;
+    border:none;
+    border-radius:10px;
+    padding:.9em 1.6em;
+    cursor:pointer;
+    transition:transform .15s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
+  }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .btn-primary{
+    background:var(--accent);
+    color:var(--accent-ink);
+  }
+  .btn-primary:hover:not(:disabled){ background:var(--accent-strong); }
+  .btn-ghost{
+    background:transparent;
+    color:var(--text);
+    border:1px solid var(--line);
+  }
+  .btn-ghost:hover{ border-color:var(--accent); color:var(--accent-strong); }
+
+  /* ---------- How it works ---------- */
+  .how{
+    padding-block:clamp(48px,7vw,88px);
+    border-top:1px solid var(--line);
+  }
+  .how h2{
+    font-size:clamp(1.5rem, 1vw + 1.2rem, 2.1rem);
+    font-weight:700;
+    margin:.3em 0 1.4em;
+  }
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:0;
+    border-top:1px solid var(--line);
+  }
+  .step{
+    padding:1.6em 1.4em 1.6em 0;
+    border-inline-end:1px solid var(--line);
+  }
+  .step:last-child{ border-inline-end:none; padding-inline-end:0; padding-inline-start:1.4em; }
+  .step:first-child{ padding-inline-start:0; }
+  .step .num{
+    font-family:var(--font-mono);
+    font-size:.75rem;
+    color:var(--accent);
+    letter-spacing:.1em;
+  }
+  .step h3{
+    font-size:1.05rem;
+    font-weight:600;
+    margin:.6em 0 .4em;
+  }
+  .step p{
+    font-size:.92rem;
+    color:var(--text-muted);
+    margin:0;
+  }
+  @media (max-width:720px){
+    .steps{ grid-template-columns:1fr; }
+    .step{ border-inline-end:none; border-bottom:1px solid var(--line); padding:1.4em 0; }
+    .step:first-child{ padding-inline-start:0; }
+    .step:last-child{ border-bottom:none; padding-inline-start:0; }
+  }
+
+  /* ---------- Demo ---------- */
+  .demo{
+    padding-block:clamp(56px,8vw,100px);
+    border-top:1px solid var(--line);
+    position:relative;
+    overflow:hidden;
+  }
+  .demo h2{
+    font-size:clamp(1.5rem, 1vw + 1.2rem, 2.1rem);
+    font-weight:700;
+    margin:.3em 0 .3em;
+  }
+  .demo > .wrap > p.lede{
+    color:var(--text-muted);
+    max-width:52ch;
+    margin:0 0 2.4em;
+  }
+
+  .demo-stage{
+    position:relative;
+  }
+  .demo-stage::before{
+    content:"";
+    position:absolute;
+    inset:-20% -10%;
+    background:radial-gradient(circle at 50% 35%, rgba(201,162,74,0.28), transparent 62%);
+    filter:blur(50px);
+    z-index:0;
+    pointer-events:none;
+  }
+
+  .tablet{
+    position:relative;
+    z-index:1;
+    background:var(--bg-elev);
+    border:1px solid var(--line);
+    border-radius:22px;
+    padding:clamp(16px,2.4vw,28px);
+    box-shadow:0 40px 80px -30px rgba(0,0,0,0.6);
+  }
+  .tablet-inner{
+    display:grid;
+    grid-template-columns:1.4fr 1fr;
+    gap:clamp(16px,2vw,28px);
+  }
+  @media (max-width:800px){
+    .tablet-inner{ grid-template-columns:1fr; }
+  }
+
+  .tabs{
+    display:flex;
+    gap:.5em;
+    flex-wrap:wrap;
+    margin-bottom:1.2em;
+  }
+  .tab{
+    font-family:var(--font-mono);
+    font-size:.78rem;
+    letter-spacing:.03em;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--text-muted);
+    border-radius:999px;
+    padding:.5em 1.1em;
+    cursor:pointer;
+    transition:border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  .tab[aria-selected="true"]{
+    border-color:var(--accent);
+    color:var(--accent-strong);
+    background:rgba(201,162,74,0.1);
+  }
+
+  .menu-list{
+    display:grid;
+    gap:.7em;
+  }
+  .menu-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1em;
+    background:var(--bg-elev-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:.9em 1.1em;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .menu-item:hover{
+    transform:translateY(-3px);
+    border-color:var(--line-accent);
+  }
+  .menu-item .info{
+    display:flex;
+    align-items:baseline;
+    gap:.7em;
+    flex:1;
+    min-width:0;
+  }
+  .menu-item .name{
+    font-weight:500;
+    font-size:.98rem;
+  }
+  .menu-item .price{
+    font-family:var(--font-mono);
+    font-size:.85rem;
+    color:var(--text-muted);
+  }
+  .menu-item .add{
+    font-family:var(--font-mono);
+    font-size:.78rem;
+    background:transparent;
+    border:1px solid var(--accent);
+    color:var(--accent-strong);
+    border-radius:8px;
+    padding:.45em .9em;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .2s ease, color .2s ease;
+  }
+  .menu-item .add:hover{ background:var(--accent); color:var(--accent-ink); }
+
+  /* Ticket / cart panel */
+  .ticket{
+    background:var(--bg-elev-2);
+    border:1px dashed var(--line-accent);
+    border-radius:12px;
+    padding:1.3em;
+    display:flex;
+    flex-direction:column;
+    min-height:100%;
+  }
+  .ticket-head{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.15em;
+    color:var(--text-faint);
+    text-transform:uppercase;
+    padding-bottom:.9em;
+    border-bottom:1px dashed var(--line);
+    margin-bottom:.9em;
+  }
+  .ticket-lines{
+    flex:1;
+    display:grid;
+    gap:.55em;
+    align-content:start;
+  }
+  .ticket-empty{
+    color:var(--text-faint);
+    font-size:.88rem;
+    padding:1em 0;
+  }
+  .ticket-line{
+    display:flex;
+    align-items:baseline;
+    gap:.6em;
+    font-size:.88rem;
+  }
+  .ticket-line .tl-main{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:.6em;
+    flex:1;
+    min-width:0;
+  }
+  .ticket-line .tl-name{
+    font-family:var(--font-mono);
+    color:var(--text);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .ticket-line .tl-qty{
+    color:var(--text-faint);
+    margin-inline-start:.4em;
+  }
+  .ticket-line .tl-price{
+    font-family:var(--font-mono);
+    color:var(--text-muted);
+    white-space:nowrap;
+  }
+  .ticket-line .tl-remove{
+    background:none;
+    border:none;
+    color:var(--text-faint);
+    font-family:var(--font-mono);
+    font-size:.75rem;
+    cursor:pointer;
+    text-decoration:underline;
+    padding:0;
+  }
+  .ticket-line .tl-remove:hover{ color:var(--accent-strong); }
+
+  .ticket-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    border-top:1px dashed var(--line);
+    margin-top:1em;
+    padding-top:.9em;
+    font-weight:700;
+  }
+  .ticket-total .tt-price{
+    font-family:var(--font-mono);
+    color:var(--accent-strong);
+    font-size:1.15rem;
+  }
+  .ticket .btn{
+    width:100%;
+    margin-top:1.1em;
+  }
+  .ticket-note{
+    font-family:var(--font-mono);
+    font-size:.68rem;
+    color:var(--text-faint);
+    text-align:center;
+    margin-top:.8em;
+  }
+
+  .ticket-success{
+    text-align:center;
+    padding:1.4em 0;
+  }
+  .ticket-success svg{ margin-bottom:.6em; }
+  .ticket-success p{ margin:.2em 0; }
+  .ticket-success .ok-title{ font-weight:700; }
+  .ticket-success .ok-sub{ color:var(--text-muted); font-size:.85rem; }
+
+  /* ---------- Form ---------- */
+  .cta-form{
+    padding-block:clamp(56px,8vw,100px);
+    border-top:1px solid var(--line);
+  }
+  .cta-form h2{
+    font-size:clamp(1.5rem, 1vw + 1.2rem, 2.1rem);
+    font-weight:700;
+    margin:.3em 0 .3em;
+  }
+  .cta-form p.lede{
+    color:var(--text-muted);
+    max-width:48ch;
+    margin:0 0 2em;
+  }
+  form{
+    display:grid;
+    gap:1em;
+    max-width:520px;
+  }
+  .field{ display:grid; gap:.4em; }
+  .field label{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.08em;
+    color:var(--text-muted);
+  }
+  .field input{
+    background:var(--bg-elev);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:.85em 1em;
+    color:var(--text);
+    font-family:var(--font-display);
+    font-size:.98rem;
+  }
+  .field input:focus{ border-color:var(--accent); }
+  .honeypot{
+    position:absolute;
+    inset-inline-start:-9999px;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+  }
+  .form-actions{
+    display:flex;
+    align-items:center;
+    gap:1.2em;
+    margin-top:.4em;
+  }
+  #form-status{
+    font-size:.88rem;
+    color:var(--text-muted);
+  }
+  #form-status a{ color:var(--accent-strong); }
+
+  /* ---------- Footer ---------- */
+  footer.site{
+    border-top:1px solid var(--line);
+    padding-block:28px;
+  }
+  footer.site .wrap{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.6em 1.4em;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .colophon{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    color:var(--text-faint);
+    letter-spacing:.02em;
+  }
+  footer.site a{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    color:var(--text-faint);
+    text-decoration:underline;
+  }
+  footer.site a:hover{ color:var(--accent-strong); }
+
+  @media print{
+    header.site .header-cta, .hero .actions, .cta-form, footer.site{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="logo">A<span>u</span>ra</div>
+    <a class="header-cta" href="#form">מעוניינים? השאירו פרטים</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow">דמו אינטראקטיבי</span>
+      <h1>התפריט שמזמין בעצמו,<br><em>בלי לחכות למלצר</em></h1>
+      <p class="lede">בשעות העומס מלצר צריך להגיע לכל שולחן פעמיים - פעם לקחת הזמנה, פעם להביא אותה. Aura שמה את התפריט על הטאבלט שעל השולחן, כדי שהסועד יזמין ישירות ברגע שהוא מוכן.</p>
+      <div class="actions">
+        <a href="#demo" class="btn btn-primary">נסו את הדמו</a>
+        <a href="#form" class="btn btn-ghost">מעוניינים במסעדה שלי</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how" id="how">
+    <div class="wrap">
+      <h2>איך זה עובד</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="num">01</div>
+          <h3>פותחים את התפריט</h3>
+          <p>הסועד רואה את כל התפריט על מסך הטאבלט שעל השולחן, בכל רגע שנוח לו.</p>
+        </div>
+        <div class="step">
+          <div class="num">02</div>
+          <h3>בוחרים ומוסיפים לסל</h3>
+          <p>כל פריט מתווסף בלחיצה אחת, והסכום מתעדכן באופן מיידי.</p>
+        </div>
+        <div class="step">
+          <div class="num">03</div>
+          <h3>שולחים את ההזמנה</h3>
+          <p>ההזמנה יוצאת ישר למטבח, בלי לחכות שמלצר יתפנה ויגיע לשולחן.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo -->
+  <section class="demo" id="demo">
+    <div class="wrap">
+      <h2>נסו את זה בעצמכם</h2>
+      <p class="lede">בדיוק ככה זה נראה מנקודת המבט של הסועד. תפריט לדוגמה - לא הזמנה אמיתית.</p>
+
+      <div class="demo-stage">
+        <div class="tablet">
+          <div class="tablet-inner">
+            <div class="menu-pane">
+              <div class="tabs" role="tablist" aria-label="קטגוריות תפריט">
+                <button class="tab" role="tab" aria-selected="true" data-cat="starters">מנות ראשונות</button>
+                <button class="tab" role="tab" aria-selected="false" data-cat="mains">עיקריות</button>
+                <button class="tab" role="tab" aria-selected="false" data-cat="drinks">משקאות</button>
+              </div>
+              <div class="menu-list" id="menu-list"></div>
+            </div>
+
+            <div class="ticket" id="ticket">
+              <div class="ticket-head">ההזמנה שלך</div>
+              <div id="ticket-body">
+                <div class="ticket-lines" id="ticket-lines">
+                  <p class="ticket-empty">הסל ריק - הוסיפו פריטים מהתפריט.</p>
+                </div>
+                <div class="ticket-total">
+                  <span>סה"כ</span>
+                  <span class="tt-price" id="ticket-total">₪0</span>
+                </div>
+                <button class="btn btn-primary" id="send-order" disabled>שלח הזמנה למטבח</button>
+                <div class="ticket-note">זהו דמו להמחשה - שום הזמנה אמיתית לא נשלחת</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form -->
+  <section class="cta-form" id="form">
+    <div class="wrap">
+      <h2>רוצים את זה במסעדה שלכם?</h2>
+      <p class="lede">השאירו כמה פרטים ונחזור אליכם.</p>
+      <form id="lead-form" novalidate>
+        <div class="field">
+          <label for="f-name">שם מלא</label>
+          <input type="text" id="f-name" name="name" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="f-contact">טלפון או מייל</label>
+          <input type="text" id="f-contact" name="contact" required autocomplete="tel">
+        </div>
+        <div class="field">
+          <label for="f-restaurant">שם המסעדה</label>
+          <input type="text" id="f-restaurant" name="restaurant" required autocomplete="organization">
+        </div>
+        <!-- honeypot - נשאר ריק אצל בני אדם -->
+        <div class="honeypot" aria-hidden="true">
+          <label for="f-gotcha">אל תמלאו שדה זה</label>
+          <input type="text" id="f-gotcha" name="_gotcha" tabindex="-1" autocomplete="off">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="submit-btn">שלח פרטים</button>
+          <span id="form-status" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span class="colophon">קובץ HTML אחד · בלי build · הטופס מדבר עם n8n</span>
+    <!-- TODO: להחליף למייל האמיתי -->
+    <a href="mailto:your@email.com">your@email.com</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- תפריט הדמו (נתוני דוגמה בלבד) ----------
+  const MENU = [
+    { id:'s1', cat:'starters', name:'סלט קיסר', price:38 },
+    { id:'s2', cat:'starters', name:"קרפצ'יו בקר", price:52 },
+    { id:'s3', cat:'starters', name:'מרק היום', price:28 },
+    { id:'m1', cat:'mains', name:'פסטה ארביאטה', price:62 },
+    { id:'m2', cat:'mains', name:'סלמון בגריל', price:88 },
+    { id:'m3', cat:'mains', name:'המבורגר בית', price:68 },
+    { id:'d1', cat:'drinks', name:'לימונדה ביתית', price:22 },
+    { id:'d2', cat:'drinks', name:'קפה הפוך', price:16 },
+    { id:'d3', cat:'drinks', name:'מים מוגזים', price:14 }
+  ];
+
+  let activeCat = 'starters';
+  const cart = {}; // id -> qty
+
+  const menuListEl = document.getElementById('menu-list');
+  const tabs = document.querySelectorAll('.tab');
+  const ticketLinesEl = document.getElementById('ticket-lines');
+  const ticketTotalEl = document.getElementById('ticket-total');
+  const sendBtn = document.getElementById('send-order');
+  const ticketBody = document.getElementById('ticket-body');
+  const ticketEl = document.getElementById('ticket');
+
+  function renderMenu(){
+    menuListEl.innerHTML = '';
+    MENU.filter(function(item){ return item.cat === activeCat; }).forEach(function(item){
+      const row = document.createElement('div');
+      row.className = 'menu-item';
+      row.innerHTML =
+        '<span class="info"><span class="name">' + item.name + '</span><span class="price">₪' + item.price + '</span></span>' +
+        '<button class="add" type="button" data-add="' + item.id + '">הוסף</button>';
+      menuListEl.appendChild(row);
+    });
+  }
+
+  function renderTicket(){
+    const ids = Object.keys(cart).filter(function(id){ return cart[id] > 0; });
+    if(ids.length === 0){
+      ticketLinesEl.innerHTML = '<p class="ticket-empty">הסל ריק - הוסיפו פריטים מהתפריט.</p>';
+      sendBtn.disabled = true;
+      ticketTotalEl.textContent = '₪0';
+      return;
+    }
+    let total = 0;
+    ticketLinesEl.innerHTML = '';
+    ids.forEach(function(id){
+      const item = MENU.find(function(m){ return m.id === id; });
+      const qty = cart[id];
+      const lineTotal = item.price * qty;
+      total += lineTotal;
+      const line = document.createElement('div');
+      line.className = 'ticket-line';
+      line.innerHTML =
+        '<span class="tl-main"><span class="tl-name">' + item.name + '<span class="tl-qty">× ' + qty + '</span></span>' +
+        '<span class="tl-price">₪' + lineTotal + '</span></span>' +
+        '<button class="tl-remove" type="button" data-remove="' + id + '">הסר</button>';
+      ticketLinesEl.appendChild(line);
+    });
+    ticketTotalEl.textContent = '₪' + total;
+    sendBtn.disabled = false;
+  }
+
+  function addToCart(id){
+    cart[id] = (cart[id] || 0) + 1;
+    renderTicket();
+  }
+  function removeFromCart(id){
+    delete cart[id];
+    renderTicket();
+  }
+
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      tabs.forEach(function(t){ t.setAttribute('aria-selected','false'); });
+      tab.setAttribute('aria-selected','true');
+      activeCat = tab.getAttribute('data-cat');
+      renderMenu();
+    });
+  });
+
+  menuListEl.addEventListener('click', function(e){
+    const btn = e.target.closest('[data-add]');
+    if(btn) addToCart(btn.getAttribute('data-add'));
+  });
+
+  ticketLinesEl.addEventListener('click', function(e){
+    const btn = e.target.closest('[data-remove]');
+    if(btn) removeFromCart(btn.getAttribute('data-remove'));
+  });
+
+  sendBtn.addEventListener('click', function(){
+    if(sendBtn.disabled) return;
+    ticketBody.innerHTML =
+      '<div class="ticket-success">' +
+        '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="11" stroke="#c9a24a" stroke-width="1.5"/><path d="M7 12.5l3 3 7-7" stroke="#c9a24a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '<p class="ok-title">ההזמנה נשלחה למטבח</p>' +
+        '<p class="ok-sub">(דמו להמחשה - לא נשלחה הזמנה אמיתית)</p>' +
+        '<button class="btn btn-ghost" type="button" id="reset-order">הזמנה חדשה</button>' +
+      '</div>';
+    for(const k in cart) delete cart[k];
+    document.getElementById('reset-order').addEventListener('click', function(){
+      ticketBody.innerHTML =
+        '<div class="ticket-lines" id="ticket-lines"><p class="ticket-empty">הסל ריק - הוסיפו פריטים מהתפריט.</p></div>' +
+        '<div class="ticket-total"><span>סה"כ</span><span class="tt-price" id="ticket-total">₪0</span></div>' +
+        '<button class="btn btn-primary" id="send-order" disabled>שלח הזמנה למטבח</button>' +
+        '<div class="ticket-note">זהו דמו להמחשה - שום הזמנה אמיתית לא נשלחת</div>';
+      location.reload();
+    });
+  });
+
+  renderMenu();
+  renderTicket();
+
+  // ---------- טופס יצירת קשר -> n8n ----------
+  // TODO: להדביק כאן את כתובת ה-webhook האמיתית מ-n8n לפני הפריסה
+  const WEBHOOK_URL = "PASTE_YOUR_N8N_PRODUCTION_URL_HERE";
+  // TODO: להחליף למייל האמיתי (משמש גם כגיבוי אם השליחה נכשלת)
+  const FALLBACK_EMAIL = "your@email.com";
+
+  const form = document.getElementById('lead-form');
+  const statusEl = document.getElementById('form-status');
+  const submitBtn = document.getElementById('submit-btn');
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    const data = {
+      name: form.name.value.trim(),
+      contact: form.contact.value.trim(),
+      restaurant: form.restaurant.value.trim(),
+      _gotcha: form._gotcha.value
+    };
+
+    if(!data.name || !data.contact || !data.restaurant){
+      statusEl.textContent = 'נא למלא את כל השדות.';
+      return;
+    }
+
+    // honeypot - בוט מילא שדה שאמור להישאר ריק
+    if(data._gotcha){
+      statusEl.textContent = 'תודה!';
+      form.reset();
+      return;
+    }
+    delete data._gotcha;
+
+    data.owner = "Aura";
+    data.page = location.href;
+    data.sent_at = new Date().toISOString();
+
+    submitBtn.disabled = true;
+    statusEl.textContent = 'שולח...';
+
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    .then(function(res){
+      if(!res.ok) throw new Error('bad response');
+      statusEl.textContent = 'תודה! נחזור אליכם בהקדם.';
+      form.reset();
+    })
+    .catch(function(){
+      const subject = encodeURIComponent('פנייה מעמוד הדמו של Aura');
+      const body = encodeURIComponent(
+        'שם: ' + data.name + '\n' +
+        'טלפון/מייל: ' + data.contact + '\n' +
+        'מסעדה: ' + data.restaurant
+      );
+      statusEl.innerHTML = 'לא הצלחנו לשלוח אוטומטית. אפשר לשלוח לנו ישירות: ' +
+        '<a href="mailto:' + FALLBACK_EMAIL + '?subject=' + subject + '&body=' + body + '">שלחו מייל</a>';
+    })
+    .finally(function(){
+      submitBtn.disabled = false;
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>
