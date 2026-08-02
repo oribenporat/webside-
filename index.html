@@ -302,9 +302,8 @@
   }
   .menu-item{
     display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:1em;
+    flex-direction:column;
+    gap:.4em;
     background:var(--bg-elev-2);
     border:1px solid var(--line);
     border-radius:12px;
@@ -314,6 +313,12 @@
   .menu-item:hover{
     transform:translateY(-3px);
     border-color:var(--line-accent);
+  }
+  .menu-item .info-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1em;
   }
   .menu-item .info{
     display:flex;
@@ -330,6 +335,12 @@
     font-family:var(--font-mono);
     font-size:.85rem;
     color:var(--text-muted);
+  }
+  .menu-item .desc{
+    margin:0;
+    font-size:.82rem;
+    color:var(--text-faint);
+    line-height:1.4;
   }
   .menu-item .add{
     font-family:var(--font-mono);
@@ -673,15 +684,15 @@
 
   // ---------- תפריט הדמו (נתוני דוגמה בלבד) ----------
   const MENU = [
-    { id:'s1', cat:'starters', name:'סלט קיסר', price:38 },
-    { id:'s2', cat:'starters', name:"קרפצ'יו בקר", price:52 },
-    { id:'s3', cat:'starters', name:'מרק היום', price:28 },
-    { id:'m1', cat:'mains', name:'פסטה ארביאטה', price:62 },
-    { id:'m2', cat:'mains', name:'סלמון בגריל', price:88 },
-    { id:'m3', cat:'mains', name:'המבורגר בית', price:68 },
-    { id:'d1', cat:'drinks', name:'לימונדה ביתית', price:22 },
-    { id:'d2', cat:'drinks', name:'קפה הפוך', price:16 },
-    { id:'d3', cat:'drinks', name:'מים מוגזים', price:14 }
+    { id:'s1', cat:'starters', name:'סלט קיסר', price:38, desc:'חסה, קרוטונים, פרמזן, רוטב סזאר' },
+    { id:'s2', cat:'starters', name:"קרפצ'יו בקר", price:52, desc:'בקר פרוס דק, רוקט, פרמזן, שמן זית' },
+    { id:'s3', cat:'starters', name:'מרק היום', price:28, desc:'ירקות טריים ועשבי תיבול, מתחלף מדי יום' },
+    { id:'m1', cat:'mains', name:'פסטה ארביאטה', price:62, desc:'פסטה, רוטב עגבניות חריף, שום, בזיליקום' },
+    { id:'m2', cat:'mains', name:'סלמון בגריל', price:88, desc:'פילה סלמון, ירקות אפויים, לימון' },
+    { id:'m3', cat:'mains', name:'המבורגר בית', price:68, desc:'בקר טחון, חסה, עגבנייה, בצל מקורמל, לחמנייה בריוש' },
+    { id:'d1', cat:'drinks', name:'לימונדה ביתית', price:22, desc:'לימון סחוט, נענע, סירופ סוכר' },
+    { id:'d2', cat:'drinks', name:'קפה הפוך', price:16, desc:'אספרסו, חלב מוקצף' },
+    { id:'d3', cat:'drinks', name:'מים מוגזים', price:14, desc:'מים מוגזים, פלח לימון' }
   ];
 
   let activeCat = 'starters';
@@ -701,8 +712,11 @@
       const row = document.createElement('div');
       row.className = 'menu-item';
       row.innerHTML =
-        '<span class="info"><span class="name">' + item.name + '</span><span class="price">₪' + item.price + '</span></span>' +
-        '<button class="add" type="button" data-add="' + item.id + '">הוסף</button>';
+        '<div class="info-row">' +
+          '<span class="info"><span class="name">' + item.name + '</span><span class="price">₪' + item.price + '</span></span>' +
+          '<button class="add" type="button" data-add="' + item.id + '">הוסף</button>' +
+        '</div>' +
+        '<p class="desc">' + item.desc + '</p>';
       menuListEl.appendChild(row);
     });
   }
